@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;family=VT323&amp;display=swap" rel="stylesheet">
+<script src="photo-deck.js"></script>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%;background:#07070c}
+  @keyframes blink{0%,55%{opacity:1}56%,100%{opacity:.18}}
+  @keyframes goalpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}
+  @keyframes bobby{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+  @keyframes risein{0%{transform:translateY(14px);opacity:0}100%{transform:translateY(0);opacity:1}}
+</style>
+</helmet>
+<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#07070c;font-family:'VT323',monospace">
+  <div style="position:relative;width:min(100vw, calc(100dvh * 180 / 380));aspect-ratio:180 / 380;margin:0 auto;overflow:hidden;background:#0b0b12;box-shadow:0 0 0 2px #000, 0 24px 70px rgba(0,0,0,.65)">
+
+    <sc-if value="{{ screenPlay }}" hint-placeholder-val="{{ true }}">
+      <canvas ref="{{ canvasRef }}" style="width:100%;height:100%;display:block;image-rendering:pixelated;background:#0b0b12;touch-action:none"></canvas>
+
+      <!-- top banner on the stands -->
+      <div style="position:absolute;top:2.3%;left:50%;transform:translateX(-50%);font-family:'Press Start 2P';font-size:6px;letter-spacing:1px;color:#f5e9c9;text-shadow:1px 1px 0 #000;white-space:nowrap;pointer-events:none">HAPPY FATHER'S DAY</div>
+
+      <!-- mute -->
+      <button onClick="{{ onMute }}" style="position: absolute; top: 13px; font-family: 'Press Start 2P'; font-size: 5px; color: #1d1712; background: #f2c43d; border: 2px solid #1d1712; box-shadow: 2px 2px 0 #1d1712; padding: 5px 6px; cursor: pointer; letter-spacing: 1px; left: 365px">{{ muteLabel }}</button>
+
+      <!-- in-play prompt pill -->
+      <sc-if value="{{ showPrompt }}" hint-placeholder-val="{{ false }}">
+        <div style="position: absolute; left: 212px; transform: translateX(-50%); background: rgba(8,8,14,.82); border: 2px solid #f2c43d; color: #f5e9c9; font-family: 'Press Start 2P'; font-size: 6.5px; line-height: 1.7; padding: 8px 11px; max-width: 82%; text-align: center; letter-spacing: .5px; pointer-events: none; top: 784px">{{ prompt }}</div>
+      </sc-if>
+
+      <!-- GOAL overlay -->
+      <sc-if value="{{ goalUi }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;inset:0;pointer-events:none;display:flex;flex-direction:column;align-items:center">
+          <div style="margin-top:24%;font-family:'Press Start 2P';font-size:22px;color:#f2c43d;text-shadow:4px 4px 0 #7a1d12, 0 0 2px #000;animation:goalpulse .5s ease-in-out infinite;letter-spacing:2px">GOAL!</div>
+          <div style="margin-top:14px;font-family:'Press Start 2P';font-size:7px;color:#f5e9c9;text-shadow:1px 1px 0 #000;letter-spacing:1px">BABA SCORES!</div>
+          <sc-if value="{{ showGalleryBtn }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ onOpenGallery }}" style="position:absolute;bottom:14%;left:50%;transform:translateX(-50%);pointer-events:auto;font-family:'Press Start 2P';font-size:8px;color:#1d1712;background:#f2c43d;border:3px solid #1d1712;box-shadow:5px 5px 0 #1d1712;padding:13px 15px;cursor:pointer;letter-spacing:1px;animation:risein .4s ease;white-space:nowrap">OPEN OUR GALLERY ▶</button>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <!-- TITLE overlay -->
+      <sc-if value="{{ titleVisible }}" hint-placeholder-val="{{ true }}">
+        <div style="position:absolute;inset:0;background:rgba(7,7,13,.55);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 22px;gap:14px">
+          <div style="font-family:'Press Start 2P';font-size:6px;color:#f5e9c9;letter-spacing:2px;opacity:.85">FOR BABA , FROM DING</div>
+          <div style="font-family: 'Press Start 2P'; font-size: 18px; line-height: 1.55; color: #f2c43d; text-shadow: 3px 3px 0 #7a1d12, 0 0 2px #000; letter-spacing: 2px; width: 273px; height: 80px">HAPPY<br>FATHER'S<br>DAY</div>
+
+          <button onClick="{{ onPressStart }}" style="margin-top:8px;font-family:'Press Start 2P';font-size:7.5px;line-height:1.7;color:#1d1712;background:#f2c43d;border:3px solid #1d1712;box-shadow:5px 5px 0 #1d1712;padding:13px 14px;cursor:pointer;letter-spacing:1px;max-width:240px;animation:blink 1.4s steps(1) infinite">PRESS START FOR A FATHER'S DAY SURPRISE ▶</button>
+
+        </div>
+      </sc-if>
+    </sc-if>
+
+    <!-- GALLERY screen -->
+    <sc-if value="{{ screenGallery }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;overflow-y:auto;background:#0d0b14;background-image:linear-gradient(#0d0b14,#120d10);padding:22px 16px 30px">
+        <div style="text-align:center">
+          <div style="font-family:'Press Start 2P';font-size:6px;color:#9bd24f;letter-spacing:2px"><br></div>
+          <div style="font-family:'Press Start 2P';font-size:13px;color:#f2c43d;text-shadow:2px 2px 0 #7a1d12;letter-spacing:1px;margin-top:12px;line-height:1.5">OUR HIGHLIGHT<br>REEL</div>
+
+        </div>
+
+        <!-- wish panel -->
+        <div style="margin:20px 2px;border:3px solid #f2c43d;box-shadow:5px 5px 0 rgba(0,0,0,.45);background:#15101a;padding:16px 14px;text-align:center">
+          <div style="font-family:'VT323',monospace;font-size:24px;line-height:1.15;color:#f5efe2">You &amp; me scoring and celebrating great goals forever!</div>
+          <div style="font-family:'Press Start 2P';font-size:8px;line-height:1.7;color:#d6322e;margin-top:14px;letter-spacing:1px">HAPPY<br>FATHER'S DAY,<br>BABA</div>
+        </div>
+
+        <!-- swipeable flashcard deck of our photos -->
+        <photo-deck style="display:block;margin:4px 2px 2px" photos='["assets/Screenshot%202026-06-21%20at%2001.29.14.png","assets/Screenshot%202026-06-21%20at%2001.29.53.png","assets/Screenshot%202026-06-21%20at%2001.30.06.png","assets/Screenshot%202026-06-21%20at%2001.30.29.png","assets/Screenshot%202026-06-21%20at%2001.30.49.png","assets/Screenshot%202026-06-21%20at%2001.31.06.png","assets/Screenshot%202026-06-21%20at%2001.31.57.png","assets/Screenshot%202026-06-21%20at%2001.33.10.png"]'></photo-deck>
+
+        <button onClick="{{ onPlayAgain }}" style="display:block;margin:22px auto 8px;font-family:'Press Start 2P';font-size:8px;color:#f5e9c9;background:#d6322e;border:3px solid #1d1712;box-shadow:5px 5px 0 #1d1712;padding:13px 16px;cursor:pointer;letter-spacing:1px">▶ PLAY AGAIN</button>
+
+      </div>
+    </sc-if>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:760},&quot;palette&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;national&quot;,&quot;options&quot;:[&quot;national&quot;,&quot;arcade&quot;,&quot;sunset&quot;,&quot;gameboy&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;goalForgiveness&quot;:{&quot;editor&quot;:&quot;float&quot;,&quot;default&quot;:0.5,&quot;min&quot;:0.4,&quot;max&quot;:0.72,&quot;step&quot;:0.02,&quot;tsType&quot;:&quot;number&quot;},&quot;startMuted&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { screen:'play', uiPhase:'title', prompt:'', showGalleryBtn:false, soundOn:true };
+
+  // ---- pixel sprites (14 wide) ----
+  SPRITES = {
+    ding_idle:[
+      "....hhhhhh....","...hhhhhhhh...","...hhhkkhhh...","...hkkkkkkh...",
+      "...hkkkkkkh...","...hkekkekh...","....kkmmkk....","....kkkkkk....",
+      "..kjjjjjjjjk..","..kjjnnnnjjk..","..kjjnnnnjjk..","..kjjjjjjjjk..",
+      "...jjjjjjjj...","...jjjjjjjj...","...ssssssss...","...sss..sss...",
+      "...kkk..kkk...","...ccc..ccc...","...bbb..bbb...","..bbbb..bbbb.."],
+    ding_kick:[
+      "....hhhhhh....","...hhhhhhhh...","...hhhkkhhh...","...hkkkkkkh...",
+      "...hkkkkkkh...","...hkekkekh...","....kkmmkk....","....kkkkkk....",
+      "..kjjjjjjjjk..","..kjjnnnnjjk..","..kjjnnnnjjk..","..kjjjjjjjjk..",
+      "...jjjjjjjj...","...jjjjjjjj...","...ssssssss...","...sss..sss...",
+      "...kkk..kkkkk.","...ccc...cccc.","...bbb....bbbb","..bbbb........"],
+    ding_cheer:[
+      "....hhhhhh....","...hhhhhhhh...","...hhhkkhhh...","...hkkkkkkh...",
+      ".k.hkkkkkkh.k.",".k.hkekkekh.k.",".k..kkmmkk..k.",".k..kkkkkk..k.",
+      "...jjjjjjjj...","...jjnnnnjj...","...jjnnnnjj...","...jjjjjjjj...",
+      "...jjjjjjjj...","...jjjjjjjj...","...ssssssss...","...sss..sss...",
+      "...kkk..kkk...","...ccc..ccc...","...bbb..bbb...","..bbbb..bbbb.."],
+    baba_idle:[
+      "....hhhhhh....","...hhhhhhhh...","..hhhhhhhhhh..","..hhkkkkkkhh..",
+      "..hkkkkkkkkh..","..hkGGkGGkkh..","..hkkkkkkkkh..","....kkmmkk....",
+      ".kjjjjjjjjjjk.",".kjjnnnnnnjjk.",".kjjnnnnnnjjk.",".kjjjjjjjjjjk.",
+      "..jjjjjjjjjj..","..jjjjjjjjjj..","..ssssssssss..","..ssss..ssss..",
+      "..kkkk..kkkk..","..cccc..cccc..","..bbbb..bbbb..",".bbbbb..bbbbb."],
+    baba_kick:[
+      "....hhhhhh....","...hhhhhhhh...","..hhhhhhhhhh..","..hhkkkkkkhh..",
+      "..hkkkkkkkkh..","..hkGGkGGkkh..","..hkkkkkkkkh..","....kkmmkk....",
+      ".kjjjjjjjjjjk.",".kjjnnnnnnjjk.",".kjjnnnnnnjjk.",".kjjjjjjjjjjk.",
+      "..jjjjjjjjjj..","..jjjjjjjjjj..","..ssssssssss..","..ssss..ssss..",
+      "..kkkk..kkkkk.","..cccc...cccc.","..bbbb....bbbb",".bbbbb........"],
+    baba_cheer:[
+      "....hhhhhh....","...hhhhhhhh...","..hhhhhhhhhh..",".khhkkkkkkhhk.",
+      ".khkkkkkkkkhk.",".khkGGkGGkkhk.",".khkkkkkkkkhk.",".k..kkmmkk..k.",
+      "..jjjjjjjjjj..","..jjnnnnnnjj..","..jjnnnnnnjj..","..jjjjjjjjjj..",
+      "..jjjjjjjjjj..","..jjjjjjjjjj..","..ssssssssss..","..ssss..ssss..",
+      "..kkkk..kkkk..","..cccc..cccc..","..bbbb..bbbb..",".bbbbb..bbbbb."],
+    ball:[".BBBBB.","BWWWWWB","BWPWPWB","BWWPWWB","BWPWPWB","BWWWWWB",".BBBBB."]
+  };
+
+  PALETTES = {
+    national:{skyT:'#2a0d12',skyB:'#591620',stand:'#3a1118',dots:['#d6322e','#f2c43d','#e8e3d6'],fieldL:'#2f7d3a',fieldD:'#266b31',line:'#e9e4d4',net:'rgba(240,238,228,.5)'},
+    arcade:{skyT:'#1d6fb8',skyB:'#54a8e2',stand:'#123f66',dots:['#ffd23f','#ff5d5d','#ffffff'],fieldL:'#3aa84a',fieldD:'#2e8f3d',line:'#ffffff',net:'rgba(255,255,255,.55)'},
+    sunset:{skyT:'#3a1d5e',skyB:'#e0663a',stand:'#562a47',dots:['#ffcf6b','#ff7a59','#ffe9c7'],fieldL:'#9ca64f',fieldD:'#86913c',line:'#fff3df',net:'rgba(255,243,223,.5)'},
+    gameboy:{skyT:'#9bbc0f',skyB:'#8bac0f',stand:'#306230',dots:['#0f380f','#306230','#9bbc0f'],fieldL:'#8bac0f',fieldD:'#306230',line:'#0f380f',net:'rgba(15,56,15,.5)'}
+  };
+
+  K=0.26; MAXP=160; GY=0.34;
+
+  componentDidMount(){
+    if(this.props && this.props.startMuted) this.setState({soundOn:false});
+  }
+  componentWillUnmount(){ this.cleanup(); this.stopMusic(); }
+
+  cmapFor(pid){
+    if(pid==='gameboy') return {h:'#0f380f',e:'#0f380f',g:'#0f380f',b:'#0f380f',j:'#306230',m:'#306230',k:'#8bac0f',G:'#8bac0f',n:'#9bbc0f',s:'#9bbc0f',c:'#9bbc0f',B:'#0f380f',W:'#9bbc0f',P:'#0f380f'};
+    return {h:'#241a15',k:'#e7b48a',e:'#241a15',m:'#8a3a2c',g:'#15110d',G:'#bfe2e8',j:'#d6322e',n:'#f2c43d',s:'#f2efe6',c:'#f2efe6',b:'#1d1712',B:'#1a1410',W:'#f7f4ec',P:'#1a1410'};
+  }
+
+  renderVals(){
+    const pid = (this.props && this.props.palette) || 'national';
+    this.pal = this.PALETTES[pid] || this.PALETTES.national;
+    this.cmap = this.cmapFor(pid);
+    let gf = (this.props && this.props.goalForgiveness); if(typeof gf!=='number'||isNaN(gf)) gf=0.52;
+    this.goalForgive = Math.max(0.4, Math.min(0.72, gf));
+    const s=this.state;
+    return {
+      screenPlay: s.screen==='play',
+      screenGallery: s.screen==='gallery',
+      titleVisible: s.uiPhase==='title',
+      goalUi: s.uiPhase==='goal',
+      showPrompt: s.uiPhase!=='title' && s.uiPhase!=='goal' && !!s.prompt,
+      showGalleryBtn: s.showGalleryBtn,
+      prompt: s.prompt,
+      muteLabel: s.soundOn?'SOUND':'MUTED',
+      canvasRef: this.canvasRef,
+      onPressStart: this.onPressStart,
+      onMute: this.onMute,
+      onOpenGallery: this.onOpenGallery,
+      onPlayAgain: this.onPlayAgain
+    };
+  }
+
+  // ---- canvas lifecycle ----
+  canvasRef = (node)=>{
+    if(!node){ this.cleanup(); return; }
+    this.cv=node; node.width=180; node.height=380;
+    this.ctx=node.getContext('2d'); this.ctx.imageSmoothingEnabled=false;
+    this.setupScene();
+    this.bindPointer();
+    this.startLoop();
+  };
+
+  cleanup(){
+    if(this.raf) cancelAnimationFrame(this.raf); this.raf=null;
+    if(this.cv && this._onDown) this.cv.removeEventListener('pointerdown', this._onDown);
+    if(this._onMove){ window.removeEventListener('pointermove', this._onMove); window.removeEventListener('pointerup', this._onUp); }
+  }
+
+  setupScene(){
+    this.crossY=70; this.postH=30;
+    this.goalLeft=Math.round(90-(this.goalForgive*180)/2);
+    this.goalRight=Math.round(90+(this.goalForgive*180)/2);
+    this.groundY=362; this.feetY=286;
+    this.dingX=58; this.babaX=112;
+    this.babaBall={x:112,y:306}; this.titleBall={x:72,y:306};
+    this.ball={x:this.titleBall.x,y:this.titleBall.y,vx:0,vy:0};
+    this.phase='title'; this.scored=false; this.frame=0; this.goalFrame=0; this.missTimer=0; this.passT=0; this.kickT=0;
+    this.dingPose='idle'; this.babaPose='idle';
+    this.aim={active:false,px:0,py:0,vx:0,vy:0,power:0};
+    this.confetti=[];
+    // crowd dots
+    this.crowd=[]; const dots=this.pal.dots;
+    for(let i=0;i<74;i++){ this.crowd.push({x:Math.floor(Math.random()*180),y:4+Math.floor(Math.random()*(this.crossY-8)),c:dots[i%dots.length]}); }
+  }
+
+  startLoop(){ const loop=()=>{ this.update(); this.draw(); this.raf=requestAnimationFrame(loop); }; this.raf=requestAnimationFrame(loop); }
+
+  // ---- update ----
+  update(){
+    this.frame++;
+    const b=this.ball;
+    if(this.phase==='pass'){
+      this.passT=Math.min(1,this.passT+1/48);
+      const t=this.passT, e=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+      b.x=this.titleBall.x+(this.babaBall.x-this.titleBall.x)*e;
+      b.y=this.titleBall.y+(this.babaBall.y-this.titleBall.y)*t - Math.sin(t*Math.PI)*46;
+      if(this.kickT++>10) this.dingPose='idle';
+      if(this.passT>=1){ this.phase='aim'; this.babaPose='idle'; this.setPrompt('PULL THE BALL DOWN & RELEASE TO SHOOT!'); }
+    } else if(this.phase==='flying'){
+      b.vy+=this.GY; b.x+=b.vx; b.y+=b.vy;
+      if(b.y<160) b.vx+=(90-b.x)*0.005;
+      if(this.kickT++>9) this.babaPose='idle';
+      if(!this.scored && b.y<=this.crossY+this.postH && b.x>=this.goalLeft && b.x<=this.goalRight){ this.goal(); }
+      else if(b.y>=this.groundY && b.vy>0){ this.miss(); }
+      else if(b.x<-12||b.x>192){ this.miss(); }
+    } else if(this.phase==='miss'){
+      if(this.missTimer++>26){ b.x=this.babaBall.x; b.y=this.babaBall.y; b.vx=b.vy=0; this.phase='aim'; this.babaPose='idle'; this.setPrompt('PULL THE BALL DOWN & RELEASE TO SHOOT!'); }
+    } else if(this.phase==='goal'){
+      this.goalFrame++;
+      for(const c of this.confetti){ c.vy+=0.12; c.x+=c.vx; c.y+=c.vy; }
+      this.confetti=this.confetti.filter(c=>c.y<this.groundY+6);
+    }
+  }
+
+  goal(){
+    this.scored=true; this.phase='goal';
+    const b=this.ball; b.x=Math.max(this.goalLeft+8,Math.min(this.goalRight-8,b.x)); b.y=this.crossY+this.postH-6; b.vx=b.vy=0;
+    this.spawnConfetti(); this.dingPose='cheer'; this.babaPose='cheer'; this.goalFrame=0;
+    this.setState({uiPhase:'goal'}); this.setPrompt('');
+    this.sfx('goal'); this.sfx('cheer');
+    setTimeout(()=>{ if(this.state.screen==='play') this.setState({showGalleryBtn:true}); },1500);
+  }
+  miss(){ this.phase='miss'; this.missTimer=0; this.sfx('miss'); this.setPrompt('SO CLOSE - TRY AGAIN, BABA!'); }
+
+  spawnConfetti(){ const cols=[...this.pal.dots,'#f2c43d','#d6322e','#ffffff']; this.confetti=[]; for(let i=0;i<80;i++){ this.confetti.push({x:90+(Math.random()-0.5)*70,y:this.crossY+30+Math.random()*20,vx:(Math.random()-0.5)*6,vy:-(2+Math.random()*5),c:cols[i%cols.length]}); } }
+
+  setPrompt(t){ if(this.state.prompt!==t) this.setState({prompt:t}); }
+
+  // ---- pointer ----
+  bindPointer(){
+    this._onDown=(e)=>{ if(this.phase!=='aim') return; const p=this.toScene(e); this.aim={active:true,px:p.x,py:p.y,vx:0,vy:0,power:0}; };
+    this._onMove=(e)=>{ if(!this.aim||!this.aim.active) return; const p=this.toScene(e); const dx=p.x-this.ball.x, dy=p.y-this.ball.y; let vx=-dx*this.K, vy=-dy*this.K; const mag=Math.hypot(vx,vy), maxV=this.MAXP*this.K; if(mag>maxV){ vx*=maxV/mag; vy*=maxV/mag; } this.aim.vx=vx; this.aim.vy=vy; this.aim.px=p.x; this.aim.py=p.y; this.aim.power=maxV?Math.min(mag/maxV,1):0; };
+    this._onUp=(e)=>{ if(!this.aim||!this.aim.active) return; this.aim.active=false; const mag=Math.hypot(this.aim.vx,this.aim.vy); if(mag<1.4 || this.phase!=='aim'){ return; } this.ball.vx=this.aim.vx; this.ball.vy=this.aim.vy; this.phase='flying'; this.babaPose='kick'; this.kickT=0; this.setPrompt('GO, BABA!'); this.sfx('kick'); };
+    this.cv.addEventListener('pointerdown',this._onDown);
+    window.addEventListener('pointermove',this._onMove);
+    window.addEventListener('pointerup',this._onUp);
+  }
+  toScene(e){ const r=this.cv.getBoundingClientRect(); return { x:(e.clientX-r.left)/r.width*180, y:(e.clientY-r.top)/r.height*380 }; }
+
+  // ---- draw ----
+  px(x,y,w,h,c){ this.ctx.fillStyle=c; this.ctx.fillRect(x|0,y|0,w,h); }
+  drawSprite(grid,ox,oy,ss){ const ctx=this.ctx, cm=this.cmap; for(let r=0;r<grid.length;r++){ const row=grid[r]; for(let c=0;c<row.length;c++){ const ch=row[c]; if(ch==='.')continue; const col=cm[ch]; if(!col)continue; ctx.fillStyle=col; ctx.fillRect(ox+c*ss, oy+r*ss, ss, ss); } } }
+
+  draw(){
+    const ctx=this.ctx; if(!ctx) return; const P=this.pal;
+    // sky / stands
+    ctx.fillStyle=P.skyT; ctx.fillRect(0,0,180,this.crossY);
+    for(const d of this.crowd){ ctx.fillStyle=d.c; ctx.fillRect(d.x,d.y,2,2); }
+    // field stripes
+    for(let y=this.crossY;y<380;y+=14){ const idx=((y-this.crossY)/14)|0; ctx.fillStyle=(idx%2)?P.fieldL:P.fieldD; ctx.fillRect(0,y,180,14); }
+    // penalty box
+    ctx.fillStyle=P.line;
+    const bx0=this.goalLeft-10,bx1=this.goalRight+10,by0=this.crossY+this.postH,by1=this.crossY+this.postH+26;
+    ctx.fillRect(bx0,by0,bx1-bx0,1); ctx.fillRect(bx0,by1,bx1-bx0,1); ctx.fillRect(bx0,by0,1,by1-by0); ctx.fillRect(bx1,by0,1,by1-by0);
+    // goal net
+    ctx.fillStyle='rgba(0,0,0,.18)'; ctx.fillRect(this.goalLeft,this.crossY,this.goalRight-this.goalLeft,this.postH);
+    ctx.fillStyle=P.net;
+    for(let x=this.goalLeft;x<=this.goalRight;x+=6) ctx.fillRect(x,this.crossY,1,this.postH);
+    for(let y=this.crossY;y<=this.crossY+this.postH;y+=6) ctx.fillRect(this.goalLeft,y,this.goalRight-this.goalLeft,1);
+    // posts + crossbar
+    ctx.fillStyle='#f4f1e8';
+    ctx.fillRect(this.goalLeft-3,this.crossY,3,this.postH);
+    ctx.fillRect(this.goalRight,this.crossY,3,this.postH);
+    ctx.fillRect(this.goalLeft-3,this.crossY-3,(this.goalRight-this.goalLeft)+6,3);
+
+    // shadows + characters
+    const titleBob=this.phase==='title';
+    const ss=3;
+    this.shadow(this.dingX,this.feetY,30);
+    this.shadow(this.babaX,this.feetY,34);
+    let dyD=0,dyB=0;
+    if(titleBob){ dyD=Math.round(Math.sin(this.frame*0.08)*2); dyB=Math.round(Math.sin(this.frame*0.08+1.2)*2); }
+    else if(this.phase==='goal'){ dyD=Math.round(Math.abs(Math.sin(this.goalFrame*0.09))*-7); dyB=Math.round(Math.abs(Math.sin(this.goalFrame*0.09+0.5))*-7); }
+    this.drawSprite(this.SPRITES['ding_'+this.dingPose], this.dingX-21, this.feetY-60+dyD, ss);
+    this.drawSprite(this.SPRITES['baba_'+this.babaPose], this.babaX-21, this.feetY-60+dyB, ss);
+
+    // ball shadow + ball
+    const elev=Math.max(0,(this.groundY-this.ball.y))/300; const sw=Math.max(4,12-elev*8);
+    ctx.fillStyle='rgba(0,0,0,.20)'; ctx.fillRect((this.ball.x-sw/2)|0,(this.groundY-2)|0,sw|0,3);
+    this.drawSprite(this.SPRITES.ball, this.ball.x-7, this.ball.y-7, 2);
+
+    // aim guide
+    if(this.phase==='aim' && this.aim && this.aim.active){
+      let sx=this.ball.x, sy=this.ball.y, svx=this.aim.vx, svy=this.aim.vy;
+      for(let i=0;i<26;i++){ svy+=this.GY; sx+=svx; sy+=svy; if(sy>this.groundY)break; if(i%2===0){ ctx.fillStyle=this.aim.power>0.66?'#f2c43d':'#f5e9c9'; ctx.fillRect((sx-1)|0,(sy-1)|0,2,2); } }
+      ctx.fillStyle='rgba(255,255,255,.45)'; ctx.fillRect((this.ball.x-1)|0,(this.ball.y-1)|0,2,2);
+    }
+    // confetti
+    if(this.phase==='goal'){ for(const c of this.confetti){ ctx.fillStyle=c.c; ctx.fillRect(c.x|0,c.y|0,3,3); } }
+  }
+  shadow(cx,fy,w){ this.ctx.fillStyle='rgba(0,0,0,.18)'; this.ctx.fillRect((cx-w/2)|0,(fy-2)|0,w,5); }
+
+  // ---- handlers ----
+  onPressStart=()=>{ this.initAudio(); this.startMusic(); this.phase='pass'; this.passT=0; this.kickT=0; this.dingPose='kick'; this.setState({uiPhase:'play'}); this.setPrompt('Ding passes to Baba...'); this.sfx('pass'); };
+  onMute=()=>{ const v=!this.state.soundOn; this.setState({soundOn:v}); if(this.master&&this.ac) this.master.gain.setTargetAtTime(v?0.16:0,this.ac.currentTime,0.02); };
+  onOpenGallery=()=>{ this.setState({screen:'gallery'}); };
+  onPlayAgain=()=>{ this.setState({screen:'play',uiPhase:'title',showGalleryBtn:false,prompt:''}); };
+
+  // ---- audio ----
+  initAudio(){ try{ if(this.ac){ if(this.ac.state==='suspended') this.ac.resume(); return; } const AC=window.AudioContext||window.webkitAudioContext; this.ac=new AC(); this.master=this.ac.createGain(); this.master.gain.value=this.state.soundOn?0.16:0; this.master.connect(this.ac.destination); const len=Math.floor(this.ac.sampleRate*0.6); this.noiseBuf=this.ac.createBuffer(1,len,this.ac.sampleRate); const d=this.noiseBuf.getChannelData(0); for(let i=0;i<len;i++) d[i]=Math.random()*2-1; }catch(e){} }
+  tone(freq,start,dur,type,vol,glide){ if(!this.ac)return; try{ const t0=this.ac.currentTime+start; const o=this.ac.createOscillator(), g=this.ac.createGain(); o.type=type||'square'; o.frequency.setValueAtTime(freq,t0); if(glide) o.frequency.exponentialRampToValueAtTime(glide,t0+dur); g.gain.setValueAtTime(0.0001,t0); g.gain.exponentialRampToValueAtTime(vol,t0+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t0+dur); o.connect(g); g.connect(this.master); o.start(t0); o.stop(t0+dur+0.02);}catch(e){} }
+  noiseHit(start,dur,vol,freq){ if(!this.ac||!this.noiseBuf)return; try{ const t0=this.ac.currentTime+start; const s=this.ac.createBufferSource(); s.buffer=this.noiseBuf; const f=this.ac.createBiquadFilter(); f.type='bandpass'; f.frequency.setValueAtTime(freq||1200,t0); if(freq) f.frequency.exponentialRampToValueAtTime(freq*2.2,t0+dur); const g=this.ac.createGain(); g.gain.setValueAtTime(vol,t0); g.gain.exponentialRampToValueAtTime(0.0001,t0+dur); s.connect(f); f.connect(g); g.connect(this.master); s.start(t0); s.stop(t0+dur+0.02);}catch(e){} }
+  sfx(name){ if(!this.ac)return; if(name==='pass'){ this.tone(440,0,0.07,'square',0.12); this.tone(660,0.05,0.09,'square',0.10);} else if(name==='kick'){ this.noiseHit(0,0.1,0.18,900); this.tone(150,0,0.13,'sine',0.22,60);} else if(name==='goal'){ [523,659,784,1047].forEach((f,i)=>this.tone(f,i*0.09,0.12,'square',0.15)); } else if(name==='cheer'){ this.noiseHit(0,0.55,0.10,500);} else if(name==='miss'){ this.tone(330,0,0.13,'square',0.12); this.tone(247,0.13,0.17,'square',0.12);} }
+  startMusic(){ if(!this.ac||this.musicTimer)return; const mel=[523,0,659,0,784,659,523,0,587,0,698,0,784,0,659,0]; const bass=[131,131,196,196,175,175,196,196,147,147,196,196,131,131,196,196]; const tempo=132, step=60/tempo/2; this.musicStep=0; this.musicTimer=setInterval(()=>{ const i=this.musicStep%16; if(mel[i]) this.tone(mel[i],0,step*0.9,'square',0.05); if(bass[i]) this.tone(bass[i],0,step*0.95,'triangle',0.06); this.musicStep++; }, step*1000); }
+  stopMusic(){ if(this.musicTimer){ clearInterval(this.musicTimer); this.musicTimer=null; } }
+}
+</script>
+</body>
+</html>
